@@ -1,0 +1,112 @@
+{% extends 'base/layout.html' %}
+{% block title %}{{ action }} Nota{% endblock %}
+{% block page_title %}{{ action }} Nota{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>{{ action }} Nota</h1>
+    <p>Registra el desempeño académico de tus estudiantes</p>
+  </div>
+  <a href="{% url 'grades:list' %}" class="btn-outline">
+    <i class="bi bi-arrow-left"></i> Volver
+  </a>
+</div>
+
+<div class="row">
+  <div class="col-lg-7">
+    <div class="card">
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Estudiante *</label>
+          <select name="student" class="form-control" required>
+            <option value="">Seleccionar estudiante...</option>
+            {% for student in students %}
+            <option value="{{ student.pk }}"
+              {% if grade.student_id == student.pk or preselect == student.pk|stringformat:"s" %}selected{% endif %}>
+              {{ student.get_full_name }}
+              {% if student.classroom %} -- {{ student.classroom.name }}{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nombre de la actividad *</label>
+          <input type="text" name="activity_name" class="form-control"
+            placeholder="Ej: Examen parcial 1, Tarea capítulo 3..."
+            value="{{ grade.activity_name|default:'' }}" required>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6 form-group">
+            <label class="form-label">Tipo de evaluación</label>
+            <select name="grade_type" class="form-control">
+              {% for value, label in grade_types %}
+              <option value="{{ value }}" {% if grade.grade_type == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6 form-group">
+            <label class="form-label">Periodo</label>
+            <input type="text" name="period" class="form-control"
+              placeholder="Ej: Periodo 1, Q1, Semestre A..."
+              value="{{ grade.period|default:'' }}">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nota obtenida * <small class="text-muted">(sobre 5.0 — escribe 45 para 4.5)</small></label>
+          <input type="text" name="score" class="form-control"
+            placeholder="Ej: 4.5 o 45 o 5"
+            value="{{ grade.score|default:'' }}" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Fecha *</label>
+          <input type="date" name="date" class="form-control"
+            value="{{ grade.date|date:'Y-m-d'|default:today }}" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Observaciones</label>
+          <textarea name="observations" class="form-control" rows="3"
+            placeholder="Comentarios sobre el desempeño...">{{ grade.observations|default:'' }}</textarea>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" class="btn-primary">
+            <i class="bi bi-check2-circle"></i> {{ action }} nota
+          </button>
+          <a href="{% url 'grades:list' %}" class="btn-outline">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header"><span class="card-title">💡 Escala de notas</span></div>
+      <div style="display:flex;flex-direction:column;gap:.6rem;">
+        <div class="d-flex justify-content-between align-items-center">
+          <span style="font-size:.875rem;">Excelente</span>
+          <span class="grade-pill grade-a">4.5 – 5.0</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <span style="font-size:.875rem;">Bueno</span>
+          <span class="grade-pill grade-b">3.5 – 4.4</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <span style="font-size:.875rem;">Básico</span>
+          <span class="grade-pill grade-c">3.0 – 3.4</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <span style="font-size:.875rem;">Bajo</span>
+          <span class="grade-pill grade-d">0.0 – 2.9</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

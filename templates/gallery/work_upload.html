@@ -1,0 +1,133 @@
+{% extends 'base/layout.html' %}
+{% block title %}Subir Trabajo{% endblock %}
+{% block page_title %}Subir Trabajo a la Galería{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>📤 Subir Trabajo</h1>
+    <p>Publica el trabajo de un estudiante y celebra su esfuerzo</p>
+  </div>
+  <a href="{% url 'gallery:list' %}" class="btn-outline"><i class="bi bi-arrow-left"></i> Volver</a>
+</div>
+<div class="row">
+  <div class="col-lg-7">
+    <div class="card">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">👧 Estudiante *</label>
+          <select name="student" class="form-control" required>
+            <option value="">Seleccionar estudiante...</option>
+            {% for student in students %}<option value="{{ student.pk }}">{{ student.get_full_name }}{% if student.classroom %} — {{ student.classroom.name }}{% endif %}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">📌 Título del trabajo *</label>
+          <input type="text" name="title" class="form-control" placeholder="Ej: Maqueta del sistema solar, Mi poema favorito..." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">📝 Descripción</label>
+          <textarea name="description" class="form-control" rows="3" placeholder="Describe el trabajo, el objetivo o la materia..."></textarea>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6 form-group">
+            <label class="form-label">🏷️ Categoría</label>
+            <select name="category" class="form-control">
+              <option value="">Sin categoría</option>
+              {% for cat in categories %}<option value="{{ cat.pk }}">{{ cat.name }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6 form-group">
+            <label class="form-label">✨ O crear nueva categoría</label>
+            <input type="text" name="new_category" class="form-control" placeholder="Ej: Arte, Ciencias, Escritura...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">🖼️ Imagen del trabajo</label>
+          <div id="imageDropZone" style="border:2px dashed var(--gray-300);border-radius:var(--radius);padding:2rem;text-align:center;cursor:pointer;transition:var(--transition);background:var(--gray-50);" onclick="document.getElementById('imageInput').click()" ondragover="this.style.borderColor='var(--primary)';event.preventDefault()" ondragleave="this.style.borderColor='var(--gray-300)'" ondrop="handleDrop(event)">
+            <div style="font-size:2rem;margin-bottom:.5rem;">📷</div>
+            <div style="font-size:.875rem;font-weight:700;color:var(--gray-700);">Haz clic o arrastra la imagen aquí</div>
+            <div style="font-size:.75rem;color:var(--gray-400);margin-top:.25rem;">JPG, PNG, GIF · Máx 10MB</div>
+            <div id="imagePreview" style="margin-top:1rem;display:none;">
+              <img id="previewImg" style="max-height:120px;border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);">
+              <div id="imageName" style="font-size:.75rem;color:var(--gray-600);margin-top:.4rem;"></div>
+            </div>
+          </div>
+          <input type="file" id="imageInput" name="image" accept="image/*" style="display:none;" onchange="previewImage(this)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">📎 Archivo adjunto (opcional)</label>
+          <input type="file" name="file" class="form-control">
+          <div style="font-size:.75rem;color:var(--gray-400);margin-top:.3rem;">PDF, Word, PowerPoint y más</div>
+        </div>
+        <div class="form-group d-flex align-items-center gap-2" style="margin-top:.75rem;">
+          <input type="checkbox" name="is_public" id="is_public" style="width:18px;height:18px;accent-color:var(--primary);cursor:pointer;" checked>
+          <label for="is_public" style="font-size:.875rem;font-weight:600;color:var(--gray-700);margin:0;cursor:pointer;">
+            <i class="bi bi-eye"></i> Visible para los padres en la galería pública
+          </label>
+        </div>
+        <div style="display:flex;gap:.75rem;margin-top:1.5rem;">
+          <button type="submit" class="btn-primary"><i class="bi bi-cloud-upload-fill"></i> Publicar en galería</button>
+          <a href="{% url 'gallery:list' %}" class="btn-outline">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card mb-3">
+      <div class="card-header"><span class="card-title">✨ ¿Cómo funciona?</span></div>
+      <div style="display:flex;flex-direction:column;gap:.85rem;font-size:.875rem;color:var(--gray-600);">
+        <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.65rem;background:var(--primary-50);border-radius:var(--radius-sm);">
+          <div style="width:28px;height:28px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:.8rem;flex-shrink:0;">1</div>
+          <span>Sube la foto o archivo del trabajo del estudiante.</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.65rem;background:var(--success-50);border-radius:var(--radius-sm);">
+          <div style="width:28px;height:28px;background:var(--success);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:.8rem;flex-shrink:0;">2</div>
+          <span>Márcalo como <strong>público</strong> para que los padres puedan verlo.</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.65rem;background:var(--amber-50);border-radius:var(--radius-sm);">
+          <div style="width:28px;height:28px;background:var(--amber);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:.8rem;flex-shrink:0;">3</div>
+          <span>Los padres acceden con su <strong>correo registrado</strong> — sin crear cuenta.</span>
+        </div>
+      </div>
+    </div>
+    <div style="background:linear-gradient(135deg,var(--primary-50),var(--accent-50));border:1.5px solid var(--primary-200);border-radius:var(--radius-lg);padding:1.25rem;">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;">
+        <span style="font-size:1.3rem;">✨</span>
+        <strong style="font-size:.9rem;color:var(--primary-dark);">Consejo del Asistente IA</strong>
+      </div>
+      <p style="font-size:.82rem;color:var(--gray-600);margin-bottom:.75rem;line-height:1.6;">¿Necesitas escribir una descripción creativa? El Asistente IA puede ayudarte.</p>
+      <a href="{% url 'ai_assistant:chat' %}" class="btn-outline btn-sm" style="width:100%;justify-content:center;"><i class="bi bi-stars"></i> Pedir ayuda a la IA</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function previewImage(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('previewImg').src = e.target.result;
+      document.getElementById('imageName').textContent = input.files[0].name;
+      document.getElementById('imagePreview').style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+    document.getElementById('imageDropZone').style.borderColor = 'var(--success)';
+    document.getElementById('imageDropZone').style.background = 'var(--success-50)';
+  }
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('imageDropZone').style.borderColor = 'var(--gray-300)';
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    const input = document.getElementById('imageInput');
+    const dt = new DataTransfer();
+    dt.items.add(files[0]);
+    input.files = dt.files;
+    previewImage(input);
+  }
+}
+</script>
+{% endblock %}

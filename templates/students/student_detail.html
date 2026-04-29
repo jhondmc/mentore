@@ -1,0 +1,138 @@
+{% extends 'base/layout.html' %}
+{% block title %}{{ student.get_full_name }}{% endblock %}
+{% block page_title %}Detalle del Estudiante{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>{{ student.get_full_name }}</h1>
+    <p>{% if student.classroom %}{{ student.classroom.name }}{% else %}Sin grupo asignado{% endif %}</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'students:edit' student.pk %}" class="btn-outline">
+      <i class="bi bi-pencil"></i> Editar
+    </a>
+    <a href="{% url 'students:list' %}" class="btn-outline">
+      <i class="bi bi-arrow-left"></i> Volver
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card text-center mb-4">
+      {% if student.photo %}
+        <img src="{{ student.photo.url }}" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--primary-100);margin:0 auto 1rem;">
+      {% else %}
+        <div class="avatar avatar-lg mx-auto mb-3" style="width:80px;height:80px;font-size:1.75rem;">{{ student.initials }}</div>
+      {% endif %}
+      <div style="font-weight:700;font-size:1.15rem;">{{ student.get_full_name }}</div>
+      {% if student.classroom %}<span class="badge badge-blue mt-1">{{ student.classroom.name }}</span>{% endif %}
+
+      {% if avg %}
+      <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--gray-100);">
+        <div style="font-size:.75rem;color:var(--gray-400);margin-bottom:.3rem;">PROMEDIO GENERAL</div>
+        <span class="grade-pill {% if avg >= 4 %}grade-a{% elif avg >= 3 %}grade-b{% elif avg >= 2.5 %}grade-c{% else %}grade-d{% endif %}" style="font-size:1.2rem;padding:.3rem .9rem;">
+          {{ avg }}
+        </span>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Información del acudiente</span></div>
+      <div style="display:flex;flex-direction:column;gap:.75rem;">
+        <div>
+          <div style="font-size:.72rem;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Nombre</div>
+          <div style="font-size:.875rem;font-weight:500;">{{ student.parent_name|default:"No registrado" }}</div>
+        </div>
+        <div>
+          <div style="font-size:.72rem;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Teléfono</div>
+          <div style="font-size:.875rem;">{{ student.parent_phone|default:"—" }}</div>
+        </div>
+        <div>
+          <div style="font-size:.72rem;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Correo</div>
+          <div style="font-size:.875rem;">{{ student.parent_email|default:"—" }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <!-- INFO CARD -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <span class="card-title">Datos personales</span>
+      </div>
+      <div class="row g-3">
+        <div class="col-sm-6">
+          <div style="font-size:.72rem;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Documento</div>
+          <div style="font-size:.875rem;margin-top:.2rem;">{{ student.document_id|default:"—" }}</div>
+        </div>
+        <div class="col-sm-6">
+          <div style="font-size:.72rem;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Correo</div>
+          <div style="font-size:.875rem;margin-top:.2rem;">{{ student.email|default:"—" }}</div>
+        </div>
+        <div class="col-sm-6">
+          <div style="font-size:.72rem;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Género</div>
+          <div style="font-size:.875rem;margin-top:.2rem;">{{ student.get_gender_display|default:"—" }}</div>
+        </div>
+        <div class="col-sm-6">
+          <div style="font-size:.72rem;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Registrado</div>
+          <div style="font-size:.875rem;margin-top:.2rem;">{{ student.created_at|date:"d/m/Y" }}</div>
+        </div>
+        {% if student.notes %}
+        <div class="col-12">
+          <div style="font-size:.72rem;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Observaciones</div>
+          <div style="font-size:.875rem;margin-top:.2rem;color:var(--gray-600);">{{ student.notes }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- GRADES -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Historial de notas</span>
+        <a href="{% url 'grades:create' %}?student={{ student.pk }}" class="btn-primary btn-sm">
+          <i class="bi bi-plus-lg"></i> Agregar nota
+        </a>
+      </div>
+      {% if grades %}
+      <div class="table-responsive">
+        <table class="mentore-table">
+          <thead>
+            <tr>
+              <th>Actividad</th>
+              <th>Tipo</th>
+              <th>Nota</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for grade in grades %}
+            <tr>
+              <td style="font-weight:500;">{{ grade.activity_name }}</td>
+              <td><span class="badge badge-blue">{{ grade.get_grade_type_display }}</span></td>
+              <td>
+                <span class="grade-pill {% if grade.score >= 4 %}grade-a{% elif grade.score >= 3 %}grade-b{% elif grade.score >= 2.5 %}grade-c{% else %}grade-d{% endif %}">
+                  {{ grade.score }}
+                </span>
+              </td>
+              <td>{{ grade.date|date:"d/m/Y" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state" style="padding:2rem;">
+        <div class="icon" style="font-size:2rem;">📊</div>
+        <h3>Sin notas aún</h3>
+        <p>Agrega la primera nota para este estudiante</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

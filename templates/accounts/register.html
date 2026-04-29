@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro — Mentore</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{% static 'css/mentore.css' %}">
+</head>
+<body>
+<div class="auth-wrapper">
+  <div class="auth-brand">
+    <div class="auth-brand-logo">Ment<span>ore</span></div>
+    <div class="auth-brand-tagline">Únete a profes que ya usan Mentore</div>
+    <div class="auth-brand-features">
+      <div class="auth-feature-item"><div class="auth-feature-icon">🚀</div><span>Configuración en menos de 2 minutos</span></div>
+      <div class="auth-feature-item"><div class="auth-feature-icon">✨</div><span>IA integrada para actividades y más</span></div>
+      <div class="auth-feature-item"><div class="auth-feature-icon">🔒</div><span>Datos seguros y protegidos</span></div>
+      <div class="auth-feature-item"><div class="auth-feature-icon">💙</div><span>Diseñado para educadores colombianos</span></div>
+    </div>
+  </div>
+  <div class="auth-form-side">
+    <div class="auth-form-box">
+      <h2 class="auth-form-title">Crea tu cuenta ✨</h2>
+      <p class="auth-form-sub">Regístrate como profesor y empieza hoy.</p>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row g-2">
+          <div class="col-6 form-group">
+            <label class="form-label">Nombre</label>
+            <input type="text" name="first_name" class="form-control" placeholder="Tu nombre" value="{{ form.first_name.value|default:'' }}">
+            {% if form.first_name.errors %}<div style="color:var(--danger);font-size:.8rem;">{{ form.first_name.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="col-6 form-group">
+            <label class="form-label">Apellido</label>
+            <input type="text" name="last_name" class="form-control" placeholder="Tu apellido" value="{{ form.last_name.value|default:'' }}">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Correo electrónico</label>
+          <input type="email" name="email" class="form-control" placeholder="tucorreo@ejemplo.com" value="{{ form.email.value|default:'' }}">
+          {% if form.email.errors %}<div style="color:var(--danger);font-size:.8rem;">{{ form.email.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nombre de usuario</label>
+          <input type="text" name="username" class="form-control" placeholder="Elige un nombre de usuario" value="{{ form.username.value|default:'' }}">
+          {% if form.username.errors %}<div style="color:var(--danger);font-size:.8rem;">{{ form.username.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="row g-2">
+          <div class="col-6 form-group">
+            <label class="form-label">Contraseña</label>
+            <input type="password" name="password1" class="form-control" placeholder="••••••••">
+            {% if form.password1.errors %}<div style="color:var(--danger);font-size:.8rem;">{{ form.password1.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="col-6 form-group">
+            <label class="form-label">Confirmar</label>
+            <input type="password" name="password2" class="form-control" placeholder="••••••••">
+            {% if form.password2.errors %}<div style="color:var(--danger);font-size:.8rem;">{{ form.password2.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+        <button type="submit" class="btn-primary w-100 justify-content-center mt-2" style="padding:.75rem;">
+          <i class="bi bi-person-plus-fill"></i> Crear cuenta
+        </button>
+      </form>
+      <p style="text-align:center;font-size:.875rem;color:var(--gray-500);margin-top:1.5rem;">
+        ¿Ya tienes cuenta? <a href="{% url 'accounts:login' %}" style="color:var(--primary);font-weight:700;text-decoration:none;">Iniciar sesión</a>
+      </p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

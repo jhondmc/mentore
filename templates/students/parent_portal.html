@@ -1,0 +1,540 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal para Padres — Mentore</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{% static 'css/mentore.css' %}">
+  <style>
+    body { background: var(--gray-50); }
+
+    /* TOPBAR */
+    .portal-nav {
+      background: white;
+      border-bottom: 1.5px solid var(--gray-100);
+      padding: .85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 2px 12px rgba(59,157,210,.06);
+    }
+    .portal-brand {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: 'Sora', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--gray-900);
+      text-decoration: none;
+    }
+    .portal-brand-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .portal-brand span { color: var(--primary); }
+
+    /* HERO */
+    .portal-hero {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 55%, var(--accent) 120%);
+      padding: 3rem 0 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .portal-hero::before {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.05);
+      top: -200px; right: -100px;
+    }
+    .portal-hero::after {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: rgba(255,112,67,.1);
+      bottom: -100px; left: 10%;
+    }
+
+    /* TABS */
+    .portal-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--gray-100);
+      background: white;
+      overflow-x: auto;
+    }
+    .portal-tab {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .85rem 1.25rem;
+      font-size: .875rem;
+      font-weight: 700;
+      color: var(--gray-500);
+      cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+      margin-bottom: -2px;
+      transition: all .2s;
+      white-space: nowrap;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+    .portal-tab:hover { color: var(--primary); }
+    .portal-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    /* GRADE BARS */
+    .grade-bar-bg {
+      height: 8px;
+      background: var(--gray-100);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .grade-bar-fill {
+      height: 100%;
+      border-radius: 8px;
+      transition: width .5s ease;
+    }
+
+    /* ATTENDANCE DOT */
+    .att-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .att-present { background: var(--success); }
+    .att-absent  { background: var(--danger); }
+    .att-late    { background: var(--amber); }
+    .att-excused { background: var(--primary); }
+
+    /* GALLERY GRID override for portal */
+    .portal-gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="portal-nav">
+  <a href="/padres/" class="portal-brand">
+    <div class="portal-brand-icon">🎓</div>
+    Ment<span>ore</span>
+  </a>
+  <div style="font-size:.8rem;color:var(--gray-400);font-weight:600;">Portal para Familias</div>
+</nav>
+
+{% if not student %}
+<!-- ──────────────── LOGIN STATE ──────────────── -->
+<div class="portal-hero">
+  <div class="container" style="position:relative;z-index:1;text-align:center;">
+    <div style="font-size:3.5rem;margin-bottom:1rem;">👨‍👩‍👧</div>
+    <h1 style="color:white;font-size:2rem;font-weight:800;margin-bottom:.5rem;">Portal para Familias</h1>
+    <p style="color:rgba(255,255,255,.8);font-size:1rem;">Consulta el progreso, trabajos y mensajes de tu hijo/a</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="card" style="box-shadow:var(--shadow-lg);">
+        <div style="text-align:center;margin-bottom:1.5rem;">
+          <div style="width:56px;height:56px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto .75rem;">🔑</div>
+          <h2 style="font-size:1.25rem;font-weight:800;">Ingresa aquí</h2>
+          <p style="font-size:.85rem;color:var(--gray-400);margin:0;">Usa el correo que el profe registró</p>
+        </div>
+        <form method="get">
+          <div class="form-group">
+            <label class="form-label">Correo del acudiente</label>
+            <input type="email" name="email" class="form-control" placeholder="tucorreo@ejemplo.com"
+                   value="{{ email }}" autofocus required style="font-size:.95rem;padding:.75rem 1rem;">
+            {% if email and not student %}
+            <div style="color:var(--danger);font-size:.8rem;margin-top:.4rem;font-weight:600;">
+              <i class="bi bi-exclamation-circle"></i> Correo no encontrado. Verifica con el profesor.
+            </div>
+            {% endif %}
+          </div>
+          <button type="submit" class="btn-primary" style="width:100%;justify-content:center;padding:.75rem;font-size:1rem;">
+            <i class="bi bi-arrow-right-circle-fill"></i> Ver progreso de mi hijo/a
+          </button>
+        </form>
+        <div style="margin-top:1.25rem;padding:1rem;background:var(--primary-50);border-radius:var(--radius-sm);font-size:.8rem;color:var(--gray-600);display:flex;gap:.5rem;">
+          <i class="bi bi-info-circle" style="color:var(--primary);flex-shrink:0;margin-top:.1rem;"></i>
+          <span>El profe registra tu correo al crear el perfil del estudiante. Comunícate con él si no puedes acceder.</span>
+        </div>
+      </div>
+
+      <!-- FEATURES -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:1.5rem;">
+        <div style="background:white;border-radius:var(--radius-lg);padding:1rem;text-align:center;border:1.5px solid var(--gray-100);box-shadow:var(--shadow-card);">
+          <div style="font-size:1.8rem;margin-bottom:.4rem;">🖼️</div>
+          <div style="font-size:.8rem;font-weight:700;color:var(--gray-700);">Galería de trabajos</div>
+        </div>
+        <div style="background:white;border-radius:var(--radius-lg);padding:1rem;text-align:center;border:1.5px solid var(--gray-100);box-shadow:var(--shadow-card);">
+          <div style="font-size:1.8rem;margin-bottom:.4rem;">📊</div>
+          <div style="font-size:.8rem;font-weight:700;color:var(--gray-700);">Notas y promedio</div>
+        </div>
+        <div style="background:white;border-radius:var(--radius-lg);padding:1rem;text-align:center;border:1.5px solid var(--gray-100);box-shadow:var(--shadow-card);">
+          <div style="font-size:1.8rem;margin-bottom:.4rem;">✅</div>
+          <div style="font-size:.8rem;font-weight:700;color:var(--gray-700);">Asistencia</div>
+        </div>
+        <div style="background:white;border-radius:var(--radius-lg);padding:1rem;text-align:center;border:1.5px solid var(--gray-100);box-shadow:var(--shadow-card);">
+          <div style="font-size:1.8rem;margin-bottom:.4rem;">✉️</div>
+          <div style="font-size:.8rem;font-weight:700;color:var(--gray-700);">Mensajes del profe</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% else %}
+<!-- ──────────────── STUDENT DASHBOARD ──────────────── -->
+
+<!-- HERO with student info -->
+<div class="portal-hero">
+  <div class="container" style="position:relative;z-index:1;">
+    <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
+      <div style="width:72px;height:72px;background:rgba(255,255,255,.2);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;font-family:'Sora',sans-serif;color:white;border:2px solid rgba(255,255,255,.3);flex-shrink:0;">
+        {% if student.photo %}
+          <img src="{{ student.photo.url }}" style="width:100%;height:100%;object-fit:cover;border-radius:18px;">
+        {% else %}
+          {{ student.initials }}
+        {% endif %}
+      </div>
+      <div>
+        <p style="color:rgba(255,255,255,.7);font-size:.85rem;margin:0 0 .25rem;">Bienvenid@, familia</p>
+        <h1 style="color:white;font-size:1.6rem;font-weight:800;margin:0;">{{ student.get_full_name }}</h1>
+        <p style="color:rgba(255,255,255,.8);font-size:.9rem;margin:.25rem 0 0;">
+          {% if student.classroom %}{{ student.classroom.name }}{% endif %}
+          {% if student.classroom and student.classroom.grade_level %} · {{ student.classroom.grade_level }}{% endif %}
+        </p>
+      </div>
+      <div style="margin-left:auto;" class="d-none d-md-block">
+        <a href="/padres/" style="display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:var(--radius-sm);color:white;text-decoration:none;font-size:.8rem;font-weight:700;">
+          <i class="bi bi-arrow-left"></i> Cambiar correo
+        </a>
+      </div>
+    </div>
+
+    <!-- MINI STATS -->
+    <div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap;">
+      <div style="background:rgba(255,255,255,.15);border-radius:var(--radius-sm);padding:.6rem 1.1rem;text-align:center;">
+        <div style="font-family:'Sora',sans-serif;font-size:1.4rem;font-weight:800;color:white;">{{ student.average_grade|default:"—" }}</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.7);font-weight:600;">Promedio</div>
+      </div>
+      <div style="background:rgba(255,255,255,.15);border-radius:var(--radius-sm);padding:.6rem 1.1rem;text-align:center;">
+        <div style="font-family:'Sora',sans-serif;font-size:1.4rem;font-weight:800;color:white;">{{ grades.count }}</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.7);font-weight:600;">Notas</div>
+      </div>
+      <div style="background:rgba(255,255,255,.15);border-radius:var(--radius-sm);padding:.6rem 1.1rem;text-align:center;">
+        <div style="font-family:'Sora',sans-serif;font-size:1.4rem;font-weight:800;color:white;">{{ works.count }}</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.7);font-weight:600;">Trabajos</div>
+      </div>
+      <div style="background:rgba(255,255,255,.15);border-radius:var(--radius-sm);padding:.6rem 1.1rem;text-align:center;">
+        <div style="font-family:'Sora',sans-serif;font-size:1.4rem;font-weight:800;color:white;">{{ msgs.count }}</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.7);font-weight:600;">Mensajes</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div style="background:white;border-bottom:2px solid var(--gray-100);overflow-x:auto;">
+  <div class="container" style="padding:0;">
+    <div class="portal-tabs" id="portalTabs">
+      <button class="portal-tab active" onclick="showTab('tab-grades', this)"><i class="bi bi-bar-chart-fill"></i> Notas</button>
+      <button class="portal-tab" onclick="showTab('tab-gallery', this)"><i class="bi bi-images"></i> Galería</button>
+      <button class="portal-tab" onclick="showTab('tab-attendance', this)"><i class="bi bi-calendar-check"></i> Asistencia</button>
+      <button class="portal-tab" onclick="showTab('tab-messages', this)">
+        <i class="bi bi-envelope-fill"></i> Mensajes
+        {% if msgs %}<span style="background:var(--primary);color:white;font-size:.6rem;padding:.1rem .4rem;border-radius:10px;margin-left:.2rem;">{{ msgs.count }}</span>{% endif %}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+
+  <!-- ── TAB: NOTAS ── -->
+  <div id="tab-grades" class="portal-section">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        {% if grades %}
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="padding:1.1rem 1.4rem;border-bottom:1.5px solid var(--gray-100);">
+            <span style="font-family:'Sora',sans-serif;font-weight:800;">Historial de notas</span>
+          </div>
+          {% for grade in grades %}
+          <div style="display:flex;align-items:center;gap:1rem;padding:.85rem 1.4rem;border-bottom:1px solid var(--gray-100);">
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:700;font-size:.875rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ grade.activity_name }}</div>
+              <div style="font-size:.72rem;color:var(--gray-400);margin-top:.1rem;">
+                <span class="badge badge-blue" style="font-size:.62rem;">{{ grade.get_grade_type_display }}</span>
+                {% if grade.period %} · {{ grade.period }}{% endif %}
+                · {{ grade.date|date:"d/m/Y" }}
+              </div>
+              <div class="grade-bar-bg" style="margin-top:.4rem;">
+                <div class="grade-bar-fill" style="width:{{ grade.percentage }}%;background:{% if grade.score >= 4 %}var(--success){% elif grade.score >= 3 %}var(--primary){% elif grade.score >= 2.5 %}var(--amber){% else %}var(--danger){% endif %};"></div>
+              </div>
+            </div>
+            <div style="flex-shrink:0;text-align:right;">
+              <span class="grade-pill {% if grade.score >= 4 %}grade-a{% elif grade.score >= 3 %}grade-b{% elif grade.score >= 2.5 %}grade-c{% else %}grade-d{% endif %}" style="font-size:.9rem;">{{ grade.score }}</span>
+              <div style="font-size:.7rem;color:var(--gray-400);margin-top:.15rem;">/ {{ grade.max_score }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="card"><div class="empty-state"><div class="icon">📊</div><h3>Sin notas aún</h3><p>El profesor aún no ha registrado notas</p></div></div>
+        {% endif %}
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card" style="text-align:center;margin-bottom:1rem;">
+          <div style="font-size:.75rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;">Promedio general</div>
+          {% with avg=student.average_grade %}
+          <div style="font-family:'Sora',sans-serif;font-size:3rem;font-weight:800;color:{% if avg and avg >= 4 %}var(--success){% elif avg and avg >= 3 %}var(--primary){% elif avg and avg >= 2.5 %}var(--amber){% elif avg %}var(--danger){% else %}var(--gray-300){% endif %};">{{ avg|default:"—" }}</div>
+          <div style="font-size:.8rem;color:var(--gray-500);margin-top:.25rem;">
+            {% if avg %}{% if avg >= 4 %}Excelente 🌟{% elif avg >= 3 %}Buen desempeño 👍{% elif avg >= 2.5 %}En proceso 📚{% else %}Necesita apoyo 💪{% endif %}{% endif %}
+          </div>
+          {% endwith %}
+        </div>
+        {% if grades %}
+        <div class="card">
+          <div style="font-family:'Sora',sans-serif;font-weight:800;font-size:.9rem;margin-bottom:.85rem;">Por tipo</div>
+          {% regroup grades by grade_type as grade_type_groups %}
+          {% for tg in grade_type_groups %}
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--gray-100);">
+            <span style="font-size:.82rem;color:var(--gray-600);">{{ tg.list.0.get_grade_type_display }}</span>
+            <span class="badge badge-blue">{{ tg.list|length }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: GALERÍA ── -->
+  <div id="tab-gallery" class="portal-section" style="display:none;">
+    {% if works %}
+
+    <!-- CARRUSEL DATOS -->
+    <script>
+    const parentWorks = [
+      {% for work in works %}
+      {
+        title: "{{ work.title|escapejs }}",
+        student: "{{ work.student.get_full_name|escapejs }}",
+        date: "{{ work.created_at|date:'d/m/Y' }}",
+        category: "{% if work.category %}{{ work.category.name|escapejs }}{% endif %}",
+        image: "{% if work.image %}{{ work.image.url }}{% endif %}",
+        file: "{% if work.file %}{{ work.file.url }}{% endif %}",
+        description: "{{ work.description|escapejs }}",
+      },
+      {% endfor %}
+    ];
+    </script>
+
+    <!-- CARRUSEL CONTAINER -->
+    <div style="background:white;border-radius:1rem;box-shadow:0 4px 24px rgba(59,157,210,.10);overflow:hidden;">
+      <!-- Media viewer con flechas -->
+      <div style="position:relative;background:var(--gray-50);min-height:260px;max-height:420px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        <div id="pCarouselMedia" style="width:100%;display:flex;align-items:center;justify-content:center;min-height:260px;">
+          <!-- Image/placeholder rendered by JS -->
+        </div>
+        <button id="pBtnPrev" onclick="pCarouselPrev()" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);z-index:10;background:rgba(255,255,255,.92);border:1.5px solid var(--gray-100);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,.12);transition:all .2s;" onmouseover="this.style.background='white'" onmouseout="this.style.background='rgba(255,255,255,.92)'">&#8249;</button>
+        <button id="pBtnNext" onclick="pCarouselNext()" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);z-index:10;background:rgba(255,255,255,.92);border:1.5px solid var(--gray-100);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,.12);transition:all .2s;" onmouseover="this.style.background='white'" onmouseout="this.style.background='rgba(255,255,255,.92)'">&#8250;</button>
+      </div>
+
+      <!-- Info -->
+      <div style="padding:1.25rem 1.5rem;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;">
+          <div>
+            <div id="pCarouselTitle" style="font-size:1.1rem;font-weight:800;color:var(--gray-900);"></div>
+            <div id="pCarouselMeta" style="font-size:.82rem;color:var(--gray-500);margin-top:.2rem;"></div>
+          </div>
+          <div id="pCarouselBadge"></div>
+        </div>
+        <div id="pCarouselDesc" style="font-size:.85rem;color:var(--gray-600);line-height:1.65;margin-bottom:.75rem;"></div>
+        <div id="pCarouselFile"></div>
+      </div>
+
+      <!-- Dots -->
+      <div style="display:flex;justify-content:center;gap:.4rem;padding:.6rem 1rem 1rem;flex-wrap:wrap;" id="pCarouselDots"></div>
+    </div>
+
+    <script>
+    var pIdx = 0;
+
+    function pCarouselPrev() { if (pIdx > 0) { pIdx--; pRender(); } }
+    function pCarouselNext() { if (pIdx < parentWorks.length - 1) { pIdx++; pRender(); } }
+
+    function pRender() {
+      const w = parentWorks[pIdx];
+      const total = parentWorks.length;
+
+      // Media
+      let mediaHtml = '';
+      if (w.image) {
+        mediaHtml = `<img src="${w.image}" alt="${w.title}" style="max-width:100%;max-height:420px;object-fit:contain;display:block;">`;
+      } else {
+        mediaHtml = `<div style="font-size:5rem;padding:3rem;">${w.file ? '📄' : '✏️'}</div>`;
+      }
+      document.getElementById('pCarouselMedia').innerHTML = mediaHtml;
+
+      // Title & meta
+      document.getElementById('pCarouselTitle').textContent = w.title;
+      document.getElementById('pCarouselMeta').innerHTML =
+        `<i class="bi bi-person"></i> ${w.student} &nbsp;·&nbsp; <i class="bi bi-calendar3"></i> ${w.date}`;
+
+      // Badge
+      document.getElementById('pCarouselBadge').innerHTML =
+        w.category ? `<span class="badge badge-blue">${w.category}</span>` : '';
+
+      // Description
+      document.getElementById('pCarouselDesc').textContent = w.description || '';
+
+      // File download
+      document.getElementById('pCarouselFile').innerHTML = w.file
+        ? `<a href="${w.file}" class="btn-outline btn-sm" target="_blank" download><i class="bi bi-download"></i> Descargar archivo</a>`
+        : '';
+
+      // Arrows
+      document.getElementById('pBtnPrev').style.opacity = pIdx === 0 ? '.35' : '1';
+      document.getElementById('pBtnNext').style.opacity = pIdx === total - 1 ? '.35' : '1';
+
+      // Dots
+      let dots = '';
+      for (let i = 0; i < total; i++) {
+        dots += `<span onclick="pIdx=${i};pRender();" style="width:9px;height:9px;border-radius:50%;background:${i===pIdx?'var(--primary)':'var(--gray-200)'};cursor:pointer;display:inline-block;transition:background .2s;"></span>`;
+      }
+      document.getElementById('pCarouselDots').innerHTML = dots;
+    }
+
+    // Keyboard
+    document.addEventListener('keydown', function(e) {
+      var galleryTab = document.getElementById('tab-gallery');
+      if (galleryTab && galleryTab.style.display !== 'none') {
+        if (e.key === 'ArrowLeft') pCarouselPrev();
+        if (e.key === 'ArrowRight') pCarouselNext();
+      }
+    });
+
+    // Touch/swipe support
+    var pTouchStartX = null;
+    var pMediaEl = document.getElementById('pCarouselMedia');
+    if (pMediaEl) {
+      pMediaEl.addEventListener('touchstart', function(e) { pTouchStartX = e.touches[0].clientX; }, {passive:true});
+      pMediaEl.addEventListener('touchend', function(e) {
+        if (pTouchStartX === null) return;
+        var dx = e.changedTouches[0].clientX - pTouchStartX;
+        if (dx > 40) pCarouselPrev();
+        else if (dx < -40) pCarouselNext();
+        pTouchStartX = null;
+      }, {passive:true});
+    }
+
+    // Init
+    if (parentWorks.length > 0) pRender();
+    </script>
+
+    {% else %}
+    <div class="card"><div class="empty-state"><div class="icon">🖼️</div><h3>Sin trabajos publicados aún</h3><p>El profesor publicará los trabajos aquí pronto</p></div></div>
+    {% endif %}
+  </div>
+
+  <!-- ── TAB: ASISTENCIA ── -->
+  <div id="tab-attendance" class="portal-section" style="display:none;">
+    {% if attendances %}
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="padding:1.1rem 1.4rem;border-bottom:1.5px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-family:'Sora',sans-serif;font-weight:800;">Registro de asistencia</span>
+            <span style="font-size:.78rem;color:var(--gray-400);">Últimos 30 días</span>
+          </div>
+          {% for att in attendances %}
+          <div style="display:flex;align-items:center;gap:.85rem;padding:.7rem 1.4rem;border-bottom:1px solid var(--gray-100);">
+            <span class="att-dot att-{{ att.status }}"></span>
+            <span style="font-size:.875rem;font-weight:600;flex:1;">{{ att.date|date:"d \\d\\e F" }}</span>
+            <span class="badge {% if att.status == 'present' %}badge-green{% elif att.status == 'absent' %}badge-rose{% elif att.status == 'late' %}badge-amber{% else %}badge-blue{% endif %}">
+              {{ att.get_status_display }}
+            </span>
+            {% if att.note %}<span style="font-size:.75rem;color:var(--gray-400);">{{ att.note }}</span>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card" style="text-align:center;">
+          {% with total=attendances.count present=attendances|length %}
+          <div style="font-size:.75rem;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem;">Resumen</div>
+          <div style="display:flex;flex-direction:column;gap:.6rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .85rem;background:var(--success-50);border-radius:var(--radius-sm);">
+              <span style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;font-weight:700;"><span class="att-dot att-present"></span> Presentes</span>
+              <span style="font-family:'Sora',sans-serif;font-weight:800;color:var(--success);">{{ attendances|dictsort:"status"|length }}</span>
+            </div>
+          </div>
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="card"><div class="empty-state"><div class="icon">✅</div><h3>Sin registros de asistencia aún</h3><p>El profesor registrará la asistencia aquí</p></div></div>
+    {% endif %}
+  </div>
+
+  <!-- ── TAB: MENSAJES ── -->
+  <div id="tab-messages" class="portal-section" style="display:none;">
+    {% if msgs %}
+    <div style="display:flex;flex-direction:column;gap:.85rem;">
+      {% for msg in msgs %}
+      <div class="card" style="padding:1.25rem 1.5rem;">
+        <div style="display:flex;align-items:flex-start;gap:.85rem;">
+          <div style="width:44px;height:44px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">✉️</div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.4rem;">
+              <span style="font-weight:800;font-size:.95rem;">{{ msg.subject }}</span>
+              <span style="font-size:.72rem;color:var(--gray-400);">{{ msg.sent_at|date:"d/m/Y H:i" }}</span>
+            </div>
+            <p style="font-size:.875rem;color:var(--gray-700);line-height:1.7;margin:0;white-space:pre-line;">{{ msg.body }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card"><div class="empty-state"><div class="icon">✉️</div><h3>Sin mensajes aún</h3><p>El profesor te enviará mensajes aquí</p></div></div>
+    {% endif %}
+  </div>
+
+</div><!-- /container -->
+{% endif %}
+
+<script>
+function showTab(tabId, btn) {
+  document.querySelectorAll('.portal-section').forEach(s => s.style.display = 'none');
+  document.querySelectorAll('.portal-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).style.display = '';
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

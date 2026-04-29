@@ -1,0 +1,135 @@
+{% extends 'base/layout.html' %}
+{% block title %}Estudiantes{% endblock %}
+{% block page_title %}Estudiantes{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>Gestión de Estudiantes</h1>
+    <p>{{ students.count }} estudiante{{ students.count|pluralize:",s" }} registrado{{ students.count|pluralize:",s" }}</p>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'students:classrooms' %}" class="btn-outline">
+      <i class="bi bi-grid-3x3-gap"></i> Grupos
+    </a>
+    <a href="{% url 'students:create' %}" class="btn-primary">
+      <i class="bi bi-person-plus-fill"></i> Nuevo estudiante
+    </a>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="card mb-4">
+  <form method="get" class="d-flex gap-3 flex-wrap align-items-end">
+    <div>
+      <label class="form-label">Buscar</label>
+      <div class="search-bar">
+        <span class="search-icon"><i class="bi bi-search"></i></span>
+        <input type="text" name="q" value="{{ query }}" placeholder="Nombre, apellido o documento...">
+      </div>
+    </div>
+    <div>
+      <label class="form-label">Grupo</label>
+      <select name="classroom" class="form-control" style="min-width:180px;">
+        <option value="">Todos los grupos</option>
+        {% for c in classrooms %}
+        <option value="{{ c.pk }}" {% if selected_classroom == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn-primary">Filtrar</button>
+    {% if query or selected_classroom %}
+    <a href="{% url 'students:list' %}" class="btn-outline">Limpiar</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- TABLE -->
+{% if students %}
+<div class="table-wrapper">
+  <table class="mentore-table">
+    <thead>
+      <tr>
+        <th>Estudiante</th>
+        <th>Documento</th>
+        <th>Grupo</th>
+        <th>Acudiente</th>
+        <th>Promedio</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for student in students %}
+      <tr>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            {% if student.photo %}
+              <img src="{{ student.photo.url }}" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">
+            {% else %}
+              <div class="avatar avatar-sm">{{ student.initials }}</div>
+            {% endif %}
+            <div>
+              <div style="font-weight:600;">{{ student.get_full_name }}</div>
+              <div class="text-muted">{{ student.email|default:"—" }}</div>
+            </div>
+          </div>
+        </td>
+        <td>{{ student.document_id|default:"—" }}</td>
+        <td>
+          {% if student.classroom %}
+            <span class="badge badge-blue">{{ student.classroom.name }}</span>
+          {% else %}
+            <span class="badge badge-gray">Sin grupo</span>
+          {% endif %}
+        </td>
+        <td>
+          <div style="font-size:.8rem;">
+            <div>{{ student.parent_name|default:"—" }}</div>
+            <div class="text-muted">{{ student.parent_phone|default:"" }}</div>
+          </div>
+        </td>
+        <td>
+          {% with avg=student.average_grade %}
+            {% if avg %}
+              <span class="grade-pill {% if avg >= 4 %}grade-a{% elif avg >= 3 %}grade-b{% elif avg >= 2.5 %}grade-c{% else %}grade-d{% endif %}">
+                {{ avg }}
+              </span>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          {% endwith %}
+        </td>
+        <td>
+          <div class="d-flex gap-2">
+            <a href="{% url 'students:detail' student.pk %}" class="btn-outline btn-sm" title="Ver detalles">
+              <i class="bi bi-eye"></i>
+            </a>
+            <a href="{% url 'students:edit' student.pk %}" class="btn-outline btn-sm" title="Editar">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <form method="post" action="{% url 'students:delete' student.pk %}" style="display:inline;" onsubmit="return confirm('¿Eliminar a {{ student.get_full_name }}?')">
+              {% csrf_token %}
+              <button type="submit" class="btn-danger btn-sm" title="Eliminar">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card">
+  <div class="empty-state">
+    <div class="icon">👥</div>
+    <h3>No se encontraron estudiantes</h3>
+    <p>{% if query %}Intenta con otro término de búsqueda{% else %}Comienza agregando tu primer estudiante{% endif %}</p>
+    <a href="{% url 'students:create' %}" class="btn-primary mt-3">
+      <i class="bi bi-person-plus-fill"></i> Agregar estudiante
+    </a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

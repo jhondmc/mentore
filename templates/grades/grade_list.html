@@ -1,0 +1,153 @@
+{% extends 'base/layout.html' %}
+{% block title %}Notas{% endblock %}
+{% block page_title %}Gestión de Notas{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>Notas</h1>
+    <p>{{ grades.count }} nota{{ grades.count|pluralize:",s" }} · Promedio: <strong>{{ avg }}</strong></p>
+  </div>
+  <a href="{% url 'grades:create' %}" class="btn-primary">
+    <i class="bi bi-plus-circle-fill"></i> Registrar nota
+  </a>
+</div>
+
+<!-- FILTERS -->
+<div class="card mb-4">
+  <form method="get" class="d-flex gap-3 flex-wrap align-items-end">
+    <div>
+      <label class="form-label">Buscar</label>
+      <div class="search-bar">
+        <span class="search-icon"><i class="bi bi-search"></i></span>
+        <input type="text" name="q" value="{{ query }}" placeholder="Estudiante o actividad...">
+      </div>
+    </div>
+    {% if classrooms %}
+    <div>
+      <label class="form-label">Grupo</label>
+      <select name="classroom" class="form-control" style="min-width:160px;">
+        <option value="">Todos</option>
+        {% for c in classrooms %}
+        <option value="{{ c.pk }}" {% if selected_classroom == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    {% if periods %}
+    <div>
+      <label class="form-label">Periodo</label>
+      <select name="period" class="form-control" style="min-width:130px;">
+        <option value="">Todos</option>
+        {% for p in periods %}
+        <option value="{{ p }}" {% if selected_period == p %}selected{% endif %}>{{ p }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    <button type="submit" class="btn-primary">Filtrar</button>
+    {% if query or selected_classroom or selected_period %}
+    <a href="{% url 'grades:list' %}" class="btn-outline">Limpiar</a>
+    {% endif %}
+  </form>
+</div>
+
+{% if grades %}
+<div class="table-wrapper">
+  <table class="mentore-table">
+    <thead>
+      <tr>
+        <th>Estudiante</th>
+        <th>Actividad</th>
+        <th>Tipo</th>
+        <th>Nota</th>
+        <th>Periodo</th>
+        <th>Fecha</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for grade in grades %}
+      <tr>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <div class="avatar avatar-sm">{{ grade.student.initials }}</div>
+            <span style="font-weight:600;">{{ grade.student.get_full_name }}</span>
+          </div>
+        </td>
+        <td>{{ grade.activity_name }}</td>
+        <td><span class="badge badge-blue">{{ grade.get_grade_type_display }}</span></td>
+        <td>
+          <span class="grade-pill {% if grade.score >= 4 %}grade-a{% elif grade.score >= 3 %}grade-b{% elif grade.score >= 2.5 %}grade-c{% else %}grade-d{% endif %}">
+            {{ grade.score }}
+          </span>
+          <span class="text-muted">/ {{ grade.max_score }}</span>
+        </td>
+        <td>{{ grade.period|default:"—" }}</td>
+        <td>{{ grade.date|date:"d/m/Y" }}</td>
+        <td>
+          <div class="d-flex gap-2">
+            <a href="{% url 'grades:edit' grade.pk %}" class="btn-outline btn-sm">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <button type="button" class="btn-danger btn-sm"
+              onclick="abrirModal('{{ grade.pk }}', '{{ grade.activity_name }} — {{ grade.student.get_full_name }}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card">
+  <div class="empty-state">
+    <div class="icon">📊</div>
+    <h3>No se encontraron notas</h3>
+    <p>{% if query %}Intenta con otro término{% else %}Registra la primera nota de tus estudiantes{% endif %}</p>
+    <a href="{% url 'grades:create' %}" class="btn-primary mt-3">
+      <i class="bi bi-plus-circle-fill"></i> Registrar nota
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- MODAL ELIMINAR -->
+<div id="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:16px; padding:2rem; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="font-size:3rem; margin-bottom:1rem;">🗑️</div>
+    <h3 style="margin-bottom:.5rem; font-size:1.2rem;">¿Eliminar esta nota?</h3>
+    <p id="modal-nombre" style="color:#666; font-size:.9rem; margin-bottom:1.5rem;"></p>
+    <div style="display:flex; gap:1rem; justify-content:center;">
+      <button onclick="cerrarModal()" style="padding:.6rem 1.4rem; border-radius:8px; border:1.5px solid #ddd; background:#fff; cursor:pointer; font-size:.9rem;">Cancelar</button>
+      <form id="modal-form" method="post" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" style="padding:.6rem 1.4rem; border-radius:8px; border:none; background:#ef4444; color:#fff; cursor:pointer; font-size:.9rem; font-weight:600;">Sí, eliminar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const overlay = document.getElementById('modal-overlay');
+
+  function abrirModal(pk, nombre) {
+    document.getElementById('modal-nombre').textContent = nombre;
+    document.getElementById('modal-form').action = '/grades/' + pk + '/delete/';
+    overlay.style.display = 'flex';
+  }
+
+  function cerrarModal() {
+    overlay.style.display = 'none';
+  }
+
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) cerrarModal();
+  });
+</script>
+{% endblock %}
