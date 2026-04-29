@@ -55,7 +55,7 @@
       </a>
     </li>
     <li>
-      <a href="{% url 'students:announcement_list' %}" class="sidebar-link {% if 'attendance' in request.resolver_match.url_name|default:'' %}active{% endif %}">
+      <a href="{% url 'students:attendance' %}" class="sidebar-link {% if 'attendance' in request.resolver_match.url_name|default:'' %}active{% endif %}">
         <i class="bi bi-check2-square nav-icon"></i> Asistencia
       </a>
     </li>

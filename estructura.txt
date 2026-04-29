@@ -1,0 +1,125 @@
+.
+├── accounts
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   ├── 0002_teacherprofile_new_fields.py
+│   │   ├── 0003_alter_teacherprofile_avatar_and_more.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── ai_assistant
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── calendar_app
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── db.sqlite3
+├── estructura.txt
+├── gallery
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── grades
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── GUIA_GOOGLE_CALENDAR.md
+├── manage.py
+├── media
+│   ├── gallery
+│   │   └── descarga_1.jpg
+│   └── students
+│       ├── incog.jpg
+│       └── toad_afro.jpg
+├── mentore
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── requirements.txt
+├── static
+│   ├── css
+│   │   └── mentore.css
+│   ├── img
+│   └── js
+├── students
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   ├── 0002_announcement.py
+│   │   ├── 0003_attendance.py
+│   │   ├── 0004_message.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── templatetags
+│   │   ├── dict_filters.py
+│   │   └── __init__.py
+│   ├── urls.py
+│   └── views.py
+└── templates
+    ├── accounts
+    │   ├── login.html
+    │   ├── profile.html
+    │   └── register.html
+    ├── ai_assistant
+    │   └── chat.html
+    ├── base
+    │   └── layout.html
+    ├── calendar_app
+    │   └── schedule.html
+    ├── gallery
+    │   ├── gallery_list.html
+    │   ├── parent_gallery.html
+    │   ├── work_detail.html
+    │   └── work_upload.html
+    ├── grades
+    │   ├── grade_form.html
+    │   └── grade_list.html
+    └── students
+        ├── announcement_form.html
+        ├── announcement_list.html
+        ├── attendance.html
+        ├── classroom_form.html
+        ├── classroom_list.html
+        ├── dashboard.html
+        ├── message_form.html
+        ├── message_list.html
+        ├── parent_portal.html
+        ├── schedule.html
+        ├── student_detail.html
+        ├── student_form.html
+        └── student_list.html
+
+30 directories, 93 files
