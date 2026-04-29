@@ -1,3 +1,4 @@
+import os
 import json
 import requests
 from django.shortcuts import render, redirect
@@ -22,12 +23,66 @@ Adapta el contenido al contexto colombiano cuando sea relevante.
 Cuando generes actividades incluye: objetivo, materiales, pasos, duración y evaluación."""
 
 
+# GROQ (NUEVO - RÁPIDO Y ECONÓMICO)
+# =========================
+def call_groq(prompt, history, api_key):
+    # El system prompt es el primer mensaje
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+
+    # Historial (últimos 6 mensajes, en orden correcto)
+    for h in history.order_by('-created_at')[:6][::-1]:
+        messages.append({"role": "user", "content": h.user_message})
+        messages.append({"role": "assistant", "content": h.ai_response})
+
+    messages.append({"role": "user", "content": prompt})
+
+    try:
+        resp = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            json={
+                "model": "llama-3.3-70b-versatile",
+                "messages": messages,
+                "temperature": 0.7,
+                "max_tokens": 1000
+            },
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
+            timeout=30
+        )
+
+        resp.raise_for_status()
+        data = resp.json()
+
+        if "choices" in data and data["choices"]:
+            return data["choices"][0]["message"]["content"]
+
+        return "⚠️ Groq no respondió correctamente."
+
+    except requests.exceptions.RequestException as e:
+        error_detail = str(e)
+        try:
+            if hasattr(e, 'response') and e.response is not None:
+                error_detail = e.response.text
+        except:
+            pass
+        return f"Error con Groq: {error_detail}"
+    except Exception as e:
+        return f"Error con Groq: {str(e)}"
+
+
+# =========================
 # =========================
 # SELECTOR DE IA
 # =========================
 def call_ai(prompt, history):
+    groq_key = os.getenv('GROQ_API_KEY', '')
     gemini_key = getattr(settings, 'GEMINI_API_KEY', '')
     anthropic_key = getattr(settings, 'ANTHROPIC_API_KEY', '')
+
+    if groq_key and groq_key not in ('TU_API_KEY_DE_GROQ_AQUI', ''):
+        return call_groq(prompt, history, groq_key)
 
     if anthropic_key and anthropic_key not in ('TU_API_KEY_DE_ANTHROPIC_AQUI', ''):
         return call_claude(prompt, history, anthropic_key)
@@ -36,10 +91,8 @@ def call_ai(prompt, history):
         return call_gemini(prompt, history, gemini_key)
 
     return ("⚠️ **API de IA no configurada.**\n\n"
-            "Edita `settings.py` y agrega tu clave:\n\n"
-            "GEMINI_API_KEY = 'tu-clave'\n"
-            "o\n"
-            "ANTHROPIC_API_KEY = 'tu-clave'")
+            "Configura una API key en tu `.env`:\n\n"
+            "GROQ_API_KEY = 'tu-clave'")
 
 
 # =========================
